@@ -24,3 +24,21 @@ def train_model(df: pd.DataFrame):
 
     joblib.dump(model, model_path)
     return model, (X_val, y_val), model_path
+
+
+if __name__ == "__main__":
+    import pandas as pd
+
+    # Sample dummy data for demonstration
+    df = pd.DataFrame(
+        {
+            "feature1": [1, 2, 3, 4],
+            "feature2": [10, 20, 30, 40],
+            "target": [0, 1, 0, 1],
+        }
+    )
+
+    model, (X_val, y_val), model_path = train_model(df)
+
+    print("✅ Model trained successfully.")
+    print(f"📁 Saved model at: {model_path}")
