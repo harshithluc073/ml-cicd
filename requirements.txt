@@ -1,0 +1,9 @@
+numpy
+pandas
+scikit-learn
+joblib
+pytest
+pre-commit
+flake8
+black
+ruff
