@@ -39,7 +39,10 @@ jobs:
 
       # Step 5: Run tests
       - name: Run Pytest
-        run: pytest --maxfail=1 --disable-warnings -q
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest --maxfail=1 --disable-warnings -q
+
 
       # Step 6: Run data validation, training, evaluation, and comparison
       - name: Run model training and comparison
