@@ -41,17 +41,18 @@ jobs:
       - name: Run Pytest
         run: pytest --maxfail=1 --disable-warnings -q
 
-      # Step 6: Run data validation, training, and evaluation
-      - name: Run data validation, training, and evaluation
+      # Step 6: Run data validation, training, evaluation, and comparison
+      - name: Run model training and comparison
         run: |
           python - <<'EOF'
           import pandas as pd
           from src.data_validation import validate_dataframe
           from src.train import train_model
-          from src.evaluate import evaluate_model
-          import json
+          from src.evaluate import evaluate_model, compare_with_previous
           import joblib
           import os
+          import json
+          import shutil
 
           df = pd.DataFrame({
               "feature1": [1, 2, 3, 4, 5],
@@ -64,36 +65,36 @@ jobs:
 
           model, (X_val, y_val), model_path = train_model(df)
           metrics = evaluate_model(model, X_val, y_val)
-          print("Model metrics:", metrics)
 
-          if metrics["accuracy"] < 0.5:
-              raise ValueError("Model accuracy below threshold")
+          if not compare_with_previous():
+              print("Rolling back to previous best model...")
+              if os.path.exists(model_path):
+                  os.remove(model_path)
+              exit(1)
 
-          with open("reports/performance_report.json", "r") as f:
-              report = json.load(f)
-              print("Performance report:", report)
+          print("Model accepted, accuracy:", metrics["accuracy"])
           EOF
 
-      # Step 7: Upload model and report artifacts
+      # Step 7: Upload best model and report artifacts
       - name: Upload artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: model-and-report
+          name: best-model-and-report
           path: |
             models/
-            reports/performance_report.json
+            reports/previous_performance.json
 
-      # Step 8: Create GitHub Release if model passes
+      # Step 8: Create GitHub Release for best model
       - name: Create GitHub Release
         if: success()
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
-          name: "Model Release v${{ github.run_number }}"
-          body: "Automated release with trained model and performance report."
+          name: "Best Model v${{ github.run_number }}"
+          body: "Auto-selected best model based on accuracy comparison."
           files: |
             models/*.joblib
-            reports/performance_report.json
+            reports/previous_performance.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
