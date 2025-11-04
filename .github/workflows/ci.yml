@@ -102,20 +102,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Step 9: Notify in GitHub Discussions
-      - name: Post release notification
+      # Step 9: Add summary notification (no external actions needed)
+      - name: Post workflow summary
         if: success()
-        uses: peter-evans/create-or-update-discussion@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.repository }}
-          category: "Announcements"
-          title: "Model v${{ github.run_number }} released"
-          body: |
-            ✅ **Model v${{ github.run_number }} Released Successfully**
-            - Accuracy: See attached `previous_performance.json`
-            - Artifacts: [View Release](${{ github.server_url }}/${{ github.repository }}/releases/tag/v${{ github.run_number }})
-            - Triggered by: @${{ github.actor }}
+        run: |
+          echo "✅ Model v${{ github.run_number }} Released Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- Accuracy: See attached performance report" >> $GITHUB_STEP_SUMMARY
+          echo "- Artifacts: [View Release](${{ github.server_url }}/${{ github.repository }}/releases/tag/v${{ github.run_number }})" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
 
       # Step 10: Update performance dashboard
       - name: Generate performance dashboard
