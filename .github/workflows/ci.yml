@@ -105,7 +105,7 @@ jobs:
       # Step 9: Notify in GitHub Discussions
       - name: Post release notification
         if: success()
-        uses: peter-evans/create-or-update-discussion@v4
+        uses: peter-evans/create-or-update-discussion@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
